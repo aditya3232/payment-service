@@ -27,7 +27,7 @@ skeleton/
 ├── common/               → Berisi fungsi-fungsi umum (utility/helper) yang digunakan di berbagai bagian aplikasi.
 ├── config/               → Berisi konfigurasi dan inisialisasi layanan eksternal seperti database, Redis, MinIO, dsb.
 ├── constants/            → Menyimpan nilai konstanta global seperti enum, status code, atau pesan error.
-├── controllers/          → Menangani logika untuk menerima dan merespons permintaan HTTP (jika REST digunakan).
+├── controllers/          → Menangani logika untuk menerima dan merespons permintaan HTTP (jika REST digunakan), atau message broker.
 ├── database/             → Berisi logika terkait database seperti migrasi dan seeder (data awal).
 │   └── seeders/          → Script untuk mengisi data awal (seeding).
 ├── domain/               → Berisi elemen inti domain aplikasi.
