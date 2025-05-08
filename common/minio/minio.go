@@ -3,10 +3,10 @@ package minio
 import (
 	"bytes"
 	"context"
-	"field-service/config"
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/sirupsen/logrus"
+	"payment-service/config"
 )
 
 type MinioClient struct {

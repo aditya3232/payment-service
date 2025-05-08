@@ -2,8 +2,6 @@ package config
 
 import (
 	"github.com/sirupsen/logrus"
-	_ "github.com/spf13/viper/remote"
-	"os"
 	"payment-service/common/util"
 )
 
@@ -32,6 +30,7 @@ type AppConfig struct {
 	GCSBucketName              string          `json:"gcsBucketName"`
 	Kafka                      Kafka           `json:"kafka"`
 	Midtrans                   Midtrans        `json:"midtrans"`
+	Minio                      Minio           `json:"minio"`
 }
 
 type Database struct {
@@ -68,11 +67,19 @@ type Midtrans struct {
 	IsProduction bool   `json:"isProduction"`
 }
 
+type Minio struct {
+	Address    string `json:"address"`
+	AccessKey  string `json:"accessKey"`
+	Secret     string `json:"secret"`
+	UseSsl     bool   `json:"useSsl"`
+	BucketName string `json:"bucketName"`
+}
+
 func Init() {
-	err := util.BindFromJSON(&Config, "config.json", ".")
+	err := util.BindFromJSON(&Config, "config", ".")
 	if err != nil {
 		logrus.Infof("failed to bind config: %v", err)
-		err = util.BindFromConsul(&Config, os.Getenv("CONSUL_HTTP_URL"), os.Getenv("CONSUL_HTTP_PATH"))
+		err = util.BindFromEnv(&Config)
 		if err != nil {
 			panic(err)
 		}
