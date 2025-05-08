@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/didip/tollbooth"
 	"github.com/didip/tollbooth/limiter"
@@ -11,7 +10,7 @@ import (
 	"net/http"
 	"payment-service/clients"
 	midtransClient "payment-service/clients/midtrans"
-	"payment-service/common/gcs"
+	utilminio "payment-service/common/minio"
 	"payment-service/common/response"
 	"payment-service/config"
 	"payment-service/constants"
@@ -35,6 +34,10 @@ var command = &cobra.Command{
 		if err != nil {
 			panic(err)
 		}
+		initMinio, err := config.InitMinio()
+		if err != nil {
+			panic(err)
+		}
 
 		loc, err := time.LoadLocation("Asia/Jakarta")
 		if err != nil {
@@ -50,15 +53,12 @@ var command = &cobra.Command{
 			panic(err)
 		}
 
-		gcs := initGCS()
+		minioClient := utilminio.NewMinioClient(initMinio)
 		kafka := kafkaClient.NewKafkaRegistry(config.Config.Kafka.Brokers)
-		midtrans := midtransClient.NewMidtransClient(
-			config.Config.Midtrans.ServerKey,
-			config.Config.Midtrans.IsProduction,
-		)
+		midtrans := midtransClient.NewMidtransClient(config.Config.Midtrans.ServerKey, config.Config.Midtrans.IsProduction)
 		client := clients.NewClientRegistry()
 		repository := repositories.NewRepositoryRegistry(db)
-		service := services.NewServiceRegistry(repository, gcs, kafka, midtrans)
+		service := services.NewServiceRegistry(repository, minioClient, kafka, midtrans)
 		controller := controllers.NewControllerRegistry(service)
 
 		router := gin.Default()
@@ -107,31 +107,4 @@ func Run() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func initGCS() gcs.IGCSClient {
-	decode, err := base64.StdEncoding.DecodeString(config.Config.GCSPrivateKey)
-	if err != nil {
-		panic(err)
-	}
-
-	stringPrivateKey := string(decode)
-	gcsServiceAccount := gcs.ServiceAccountKeyJSON{
-		Type:                    config.Config.GCSType,
-		ProjectID:               config.Config.GCSProjectID,
-		PrivateKeyID:            config.Config.GCSPrivateKeyID,
-		PrivateKey:              stringPrivateKey,
-		ClientEmail:             config.Config.GCSClientEmail,
-		ClientID:                config.Config.GCSClientID,
-		AuthURI:                 config.Config.GCSAuthURI,
-		TokenURI:                config.Config.GCSTokenURI,
-		AuthProviderX509CertURL: config.Config.GCSAuthProviderX509CertURL,
-		ClientX509CertURL:       config.Config.GCSClientX509CertURL,
-		UniverseDomain:          config.Config.GCSUniverseDomain,
-	}
-	gcsClient := gcs.NewGCSClient(
-		gcsServiceAccount,
-		config.Config.GCSBucketName,
-	)
-	return gcsClient
 }
