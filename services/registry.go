@@ -9,10 +9,10 @@ import (
 )
 
 type Registry struct {
-	repository repositories.IRepositoryRegistry
-	minio      utilminio.IMinioClient
-	kafka      kafka.IKafkaRegistry
-	midtrans   clients.IMidtransClient
+	repository repositories.IRepositoryRegistry // respository
+	minio      utilminio.IMinioClient           // common
+	kafka      kafka.IKafkaRegistry             // controllers
+	midtrans   clients.IMidtransClient          // clients
 }
 
 type IServiceRegistry interface {
