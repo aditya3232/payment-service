@@ -7,7 +7,7 @@ var (
 	ErrPaidAmountExceeds = errors.New("paid amount exceeds invoice amount")
 )
 
-var InvoiceErrors = []error{
+var PaymentErrors = []error{
 	ErrInvoiceNotFound,
 	ErrPaidAmountExceeds,
 }

@@ -34,4 +34,5 @@ func (u *InvoiceClient) FindByID(ctx context.Context, id int) (*InvoiceData, err
 	}
 
 	return &response.Data, nil
+
 }
