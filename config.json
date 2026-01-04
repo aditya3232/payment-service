@@ -19,7 +19,7 @@
     "brokers": ["localhost:9092"],
     "timeoutInMs": 100,
     "maxRetry": 3,
-    "topic": ""
+    "topic": "payments.created"
   },
   "internalService": {
     "invoice": {

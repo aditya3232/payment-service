@@ -12,7 +12,7 @@ type Kafka struct {
 }
 
 type IKafka interface {
-	ProduceMessage(string, []byte) error
+	ProduceMessage(topic string, key []byte, data []byte) error
 }
 
 func NewKafkaProducer(brokers []string) IKafka {
@@ -21,7 +21,7 @@ func NewKafkaProducer(brokers []string) IKafka {
 	}
 }
 
-func (k *Kafka) ProduceMessage(topic string, data []byte) error {
+func (k *Kafka) ProduceMessage(topic string, key []byte, data []byte) error {
 	config := sarama.NewConfig()
 	config.Producer.Return.Successes = true
 	config.Producer.RequiredAcks = sarama.WaitForAll
@@ -42,6 +42,7 @@ func (k *Kafka) ProduceMessage(topic string, data []byte) error {
 	message := &sarama.ProducerMessage{
 		Topic:   topic,
 		Headers: nil,
+		Key:     sarama.ByteEncoder(key),
 		Value:   sarama.ByteEncoder(data),
 	}
 

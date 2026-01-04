@@ -10,6 +10,13 @@ type PaymentRequest struct {
 	PaidAt      time.Time `json:"paid_at"`
 }
 
+type PaymentToEventRequest struct {
+	PaymentID   int     `json:"payment_id"`
+	InvoiceID   int     `json:"invoice_id"`
+	Amount      float64 `json:"amount"`
+	ReferenceNo string  `json:"reference_no"`
+}
+
 type PaymentRequestParam struct {
 	InvoiceID *int `form:"invoice_id"`
 }

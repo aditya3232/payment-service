@@ -8,6 +8,7 @@ import (
 	"payment-service/config"
 	"payment-service/constants"
 	controllers "payment-service/controllers/http"
+	kafkaClient "payment-service/controllers/kafka"
 	"payment-service/domain/models"
 	"payment-service/middlewares"
 	"payment-service/repositories"
@@ -47,8 +48,9 @@ var command = &cobra.Command{
 		}
 
 		client := clients.NewClientRegistry()
+		kafka := kafkaClient.NewKafkaRegistry(config.Config.Kafka.Brokers)
 		repository := repositories.NewRepositoryRegistry(db)
-		service := services.NewServiceRegistry(repository, client)
+		service := services.NewServiceRegistry(repository, client, kafka)
 		controller := controllers.NewControllerregistry(service)
 
 		serveHttp(controller)

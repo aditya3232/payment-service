@@ -2,9 +2,14 @@ package services
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"payment-service/clients"
 	"payment-service/common/util"
+	"payment-service/config"
+	"payment-service/constants"
 	errConstant "payment-service/constants/error"
+	"payment-service/controllers/kafka"
 	"payment-service/domain/dto"
 	"payment-service/repositories"
 	"time"
@@ -13,6 +18,7 @@ import (
 type PaymentService struct {
 	repository repositories.IRepositoryRegistry
 	client     clients.IClientRegistry
+	kafka      kafka.IKafkaRegistry
 }
 
 type IPaymentService interface {
@@ -20,8 +26,46 @@ type IPaymentService interface {
 	FindAllWithoutPagination(context.Context, *dto.PaymentRequestParam) ([]dto.PaymentResponse, error)
 }
 
-func NewPaymentService(repository repositories.IRepositoryRegistry, client clients.IClientRegistry) IPaymentService {
-	return &PaymentService{repository: repository, client: client}
+func NewPaymentService(repository repositories.IRepositoryRegistry, client clients.IClientRegistry, kafka kafka.IKafkaRegistry) IPaymentService {
+	return &PaymentService{repository: repository, client: client, kafka: kafka}
+}
+
+func (s *PaymentService) produceToKafka(req *dto.PaymentToEventRequest) error {
+	event := dto.KafkaEvent{
+		Name: constants.EventName,
+	}
+
+	metadata := dto.KafkaMetaData{
+		Sender:    "payment-service",
+		SendingAt: time.Now().Format(time.RFC3339),
+	}
+
+	body := dto.KafkaBody{
+		Type: "JSON",
+		Data: &dto.KafkaData{
+			PaymentID:   req.PaymentID,
+			InvoiceID:   req.InvoiceID,
+			Amount:      req.Amount,
+			ReferenceNo: req.ReferenceNo,
+		},
+	}
+
+	kafkaMessage := dto.KafkaMessage{
+		Event:    event,
+		Metadata: metadata,
+		Body:     body,
+	}
+
+	topic := config.Config.Kafka.Topic
+	kafkaMessageJSON, _ := json.Marshal(kafkaMessage)
+	key := []byte(fmt.Sprintf("invoice-%d", req.InvoiceID))
+
+	err := s.kafka.GetKafkaProducer().ProduceMessage(topic, key, kafkaMessageJSON)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *PaymentService) Create(ctx context.Context, req *dto.PaymentRequest) (*dto.PaymentResponse, error) {
@@ -58,6 +102,16 @@ func (s *PaymentService) Create(ctx context.Context, req *dto.PaymentRequest) (*
 			}, nil
 		}
 
+		return nil, err
+	}
+
+	err = s.produceToKafka(&dto.PaymentToEventRequest{
+		PaymentID:   payment.ID,
+		InvoiceID:   payment.InvoiceID,
+		Amount:      payment.Amount,
+		ReferenceNo: payment.ReferenceNo,
+	})
+	if err != nil {
 		return nil, err
 	}
 
