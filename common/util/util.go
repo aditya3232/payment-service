@@ -1,10 +1,12 @@
 package util
 
 import (
+	"errors"
 	"os"
 	"reflect"
 	"strconv"
 
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -98,4 +100,12 @@ func BindFromConsul(dest any, endPoint, path string) error {
 	}
 
 	return nil
+}
+
+func IsUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505"
+	}
+	return false
 }

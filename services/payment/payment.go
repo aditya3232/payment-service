@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"payment-service/clients"
+	"payment-service/common/util"
 	errConstant "payment-service/constants/error"
 	"payment-service/domain/dto"
 	"payment-service/repositories"
@@ -37,7 +38,26 @@ func (s *PaymentService) Create(ctx context.Context, req *dto.PaymentRequest) (*
 		PaidAt:      time.Now(),
 	})
 
+	// handle ketika duplicate key postgres reference_no (idempotent safe)
 	if err != nil {
+		if util.IsUniqueViolation(err) {
+			p, err := s.repository.GetPayment().
+				FindByReferenceNo(ctx, req.ReferenceNo)
+			if err != nil {
+				return nil, err
+			}
+
+			return &dto.PaymentResponse{
+				ID:          p.ID,
+				InvoiceID:   p.InvoiceID,
+				Amount:      p.Amount,
+				Method:      p.Method,
+				ReferenceNo: p.ReferenceNo,
+				PaidAt:      p.PaidAt,
+				CreatedAt:   p.CreatedAt,
+			}, nil
+		}
+
 		return nil, err
 	}
 
