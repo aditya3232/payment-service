@@ -6,7 +6,6 @@ import (
 	errConstant "payment-service/constants/error"
 	"payment-service/domain/dto"
 	"payment-service/domain/models"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -25,20 +24,15 @@ func NewPaymentRepository(db *gorm.DB) IPaymentRepository {
 }
 
 func (r *PaymentRepository) Create(ctx context.Context, req *dto.PaymentRequest) (*models.Payment, error) {
-	paidAt, err := time.Parse("2006-01-02", req.PaidAt)
-	if err != nil {
-		return nil, errWrap.WrapError(errConstant.ErrInternalServerError)
-	}
-
 	payment := models.Payment{
 		InvoiceID:   req.InvoiceID,
 		Amount:      req.Amount,
 		Method:      req.Method,
 		ReferenceNo: req.ReferenceNo,
-		PaidAt:      paidAt,
+		PaidAt:      req.PaidAt,
 	}
 
-	err = r.db.WithContext(ctx).Create(&payment).Error
+	err := r.db.WithContext(ctx).Create(&payment).Error
 	if err != nil {
 		return nil, errWrap.WrapError(errConstant.ErrSQLError)
 	}

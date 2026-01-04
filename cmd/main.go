@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 	"payment-service/clients"
@@ -41,7 +40,7 @@ var command = &cobra.Command{
 		time.Local = loc
 
 		err = db.AutoMigrate(
-			&models.Invoice{},
+			&models.Payment{},
 		)
 		if err != nil {
 			panic(err)
@@ -51,11 +50,6 @@ var command = &cobra.Command{
 		repository := repositories.NewRepositoryRegistry(db)
 		service := services.NewServiceRegistry(repository, client)
 		controller := controllers.NewControllerregistry(service)
-
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		service.GetInvoice().StartMarkOverdueJob(ctx, 5*time.Minute)
 
 		serveHttp(controller)
 	},
@@ -80,7 +74,7 @@ func serveHttp(controller controllers.IControllerRegistry) {
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, response.Response{
 			Status:  constants.Success,
-			Message: "Welcome to Invoice Service",
+			Message: "Welcome to Payment Service",
 		})
 	})
 	router.Use(func(c *gin.Context) {

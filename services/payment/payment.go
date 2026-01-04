@@ -6,6 +6,7 @@ import (
 	errConstant "payment-service/constants/error"
 	"payment-service/domain/dto"
 	"payment-service/repositories"
+	"time"
 )
 
 type PaymentService struct {
@@ -33,7 +34,7 @@ func (s *PaymentService) Create(ctx context.Context, req *dto.PaymentRequest) (*
 		Amount:      req.Amount,
 		Method:      req.Method,
 		ReferenceNo: req.ReferenceNo,
-		PaidAt:      req.PaidAt,
+		PaidAt:      time.Now(),
 	})
 
 	if err != nil {

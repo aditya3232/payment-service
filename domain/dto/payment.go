@@ -3,11 +3,11 @@ package dto
 import "time"
 
 type PaymentRequest struct {
-	InvoiceID   int     `json:"invoice_id" validate:"required,gt=0"`
-	Amount      float64 `json:"amount" validate:"required,gt=0"`
-	Method      string  `json:"method" validate:"required,gt=0"`
-	ReferenceNo string  `json:"reference_no" validate:"required,gt=0"`
-	PaidAt      string  `json:"paid_at" validate:"datetime=2006-01-02"`
+	InvoiceID   int       `json:"invoice_id" validate:"required,gt=0"`
+	Amount      float64   `json:"amount" validate:"required,gt=0"`
+	Method      string    `json:"method" validate:"required,gt=0"`
+	ReferenceNo string    `json:"reference_no" validate:"required,gt=0"`
+	PaidAt      time.Time `json:"paid_at"`
 }
 
 type PaymentRequestParam struct {
