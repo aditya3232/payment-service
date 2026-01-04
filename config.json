@@ -19,10 +19,6 @@
     "brokers": ["localhost:9092"],
     "timeoutInMs": 100,
     "maxRetry": 3,
-    "maxWaitTimeInMs": 100,
-    "maxProcessingTimeInMs": 200,
-    "backoffTimeInMs": 100,
-    "topics": [],
-    "groupID": ""
+    "topic": ""
   }
 }
