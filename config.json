@@ -20,5 +20,10 @@
     "timeoutInMs": 100,
     "maxRetry": 3,
     "topic": ""
+  },
+  "internalService": {
+    "invoice": {
+      "host": "http://localhost:2002"
+    }
   }
 }

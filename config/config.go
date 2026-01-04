@@ -39,12 +39,12 @@ type Kafka struct {
 	Topic       string   `json:"topic"`
 }
 
-type Customer struct {
+type Invoice struct {
 	Host string `json:"host"`
 }
 
 type InternalService struct {
-	Customer Customer `json:"customer"`
+	Invoice Invoice `json:"invoice"`
 }
 
 func Init() {
