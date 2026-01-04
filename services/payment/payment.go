@@ -69,9 +69,13 @@ func (s *PaymentService) produceToKafka(req *dto.PaymentToEventRequest) error {
 }
 
 func (s *PaymentService) Create(ctx context.Context, req *dto.PaymentRequest) (*dto.PaymentResponse, error) {
-	_, err := s.client.GetInvoice().FindByID(ctx, req.InvoiceID)
+	invoice, err := s.client.GetInvoice().FindByID(ctx, req.InvoiceID)
 	if err != nil {
 		return nil, errConstant.ErrInvoiceNotFound
+	}
+
+	if invoice.PaidAmount+req.Amount > invoice.Amount {
+		return nil, errConstant.ErrPaidAmountExceeds
 	}
 
 	payment, err := s.repository.GetPayment().Create(ctx, &dto.PaymentRequest{
