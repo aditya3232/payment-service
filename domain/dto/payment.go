@@ -15,8 +15,8 @@ type PaymentRequestParam struct {
 }
 
 type PaymentResponse struct {
-	ID          int64      `json:"id"`
-	InvoiceID   int64      `json:"invoice_id"`
+	ID          int        `json:"id"`
+	InvoiceID   int        `json:"invoice_id"`
 	Amount      float64    `json:"amount"`
 	Method      string     `json:"method"`
 	ReferenceNo string     `json:"reference_no"`
